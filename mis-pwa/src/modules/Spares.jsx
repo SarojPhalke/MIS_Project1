@@ -1,21 +1,12 @@
 import React from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '../shared/supabase'
+// import { supabase } from '../shared/supabase'
 
 export default function Spares() {
+  // Supabase not connected, so skip Spares query and mutations
   const qc = useQueryClient()
-  const { data } = useQuery({ queryKey: ['spares'], queryFn: async () => {
-    const { data, error } = await supabase.from('spare_parts_inventory').select('id, part_code, part_name, stock_on_hand, reorder_level')
-    if (error) throw error
-    return data
-  }})
-  const createMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('spare_parts_inventory').insert({ part_code: crypto.randomUUID().slice(0,8), part_name: 'New Part' })
-      if (error) throw error
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['spares'] })
-  })
+  const { data } = { data: [] }
+  const createMutation = { mutate: () => {} }
   return (
     <div>
       <div className="flex items-center justify-between mb-3">

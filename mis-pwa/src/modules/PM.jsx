@@ -1,21 +1,12 @@
 import React from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '../shared/supabase'
+// import { supabase } from '../shared/supabase'
 
 export default function PM() {
+  // Supabase not connected, so skip PM query and mutations
   const qc = useQueryClient()
-  const { data } = useQuery({ queryKey: ['pm'], queryFn: async () => {
-    const { data, error } = await supabase.from('pm_schedule').select('id, asset_id, title, due_date, status')
-    if (error) throw error
-    return data
-  }})
-  const createMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('pm_schedule').insert({ asset_id: null, title: 'PM Task', due_date: new Date().toISOString().slice(0,10) })
-      if (error) throw error
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['pm'] })
-  })
+  const { data } = { data: [] }
+  const createMutation = { mutate: () => {} }
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
