@@ -1,85 +1,39 @@
-import 'dotenv/config'
-import express from 'express'
-import cors from 'cors'
-import bodyParser from 'body-parser'
-import webpush from 'web-push'
-import { createClient } from '@supabase/supabase-js'
 
-const app = express()
-const port = process.env.PORT || 4000
+import express from 'express';
+import cors from 'cors';
+import supabase from './supabaseClient.js'; // ✅ works now
 
-app.use(cors())
-app.use(bodyParser.json())
+const app = express();
+app.use(cors({
+  origin: "http://localhost:5173", // React dev server
+  methods: ["GET","POST","PUT","DELETE"],
+  credentials: true
+}));
 
-const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SERVICE_ROLE_KEY || '')
+app.use(express.json());
 
-// Web Push config
-if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || 'mailto:admin@example.com',
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  )
-}
-
-// Simple in-memory store for subscriptions (replace with DB table if needed)
-const pushSubscriptions = new Map()
-
-app.get('/api/health', (req, res) => res.json({ ok: true }))
-
-// Assets sample endpoint
-app.get('/api/assets', async (req, res) => {
-  // Expecting a Supabase table: assets_master
+// ✅ Correct API
+app.get('/api/users', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('assets_master').select('id, asset_code, asset_name, location').limit(100)
-    if (error) throw error
-    res.json(data || [])
-  } catch (e) {
-    res.status(500).json([])
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, full_name, role, created_at');
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
-// Breakdown creation (with minimal shape)
-app.post('/api/breakdowns', async (req, res) => {
-  const payload = req.body || {}
-  try {
-    const { data, error } = await supabase.from('breakdown_logs').insert({
-      asset_id: payload.asset_id || null,
-      description: payload.description || '',
-      status: 'OPEN'
-    }).select('*').single()
-    if (error) throw error
-    res.json(data)
-  } catch (e) {
-    res.status(500).json({ error: 'failed' })
-  }
-})
+app.get("/", (req, res) => {
+  res.send("MIS Backend API Running ✅");
+});
 
-// Push subscription endpoints
-app.post('/api/push/subscribe', (req, res) => {
-  const { endpoint } = req.body || {}
-  if (!endpoint) return res.status(400).json({ error: 'missing endpoint' })
-  pushSubscriptions.set(endpoint, req.body)
-  res.json({ ok: true })
-})
 
-app.post('/api/push/send', async (req, res) => {
-  const { title = 'MIS', body = 'Update', data = {} } = req.body || {}
-  const payload = JSON.stringify({ title, body, data })
-  const results = []
-  for (const sub of pushSubscriptions.values()) {
-    try {
-      await webpush.sendNotification(sub, payload)
-      results.push({ ok: true })
-    } catch (e) {
-      results.push({ ok: false })
-    }
-  }
-  res.json({ sent: results.length })
-})
 
-app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`)
-})
-
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+});
 

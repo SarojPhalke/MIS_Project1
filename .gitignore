@@ -1,43 +1,38 @@
-# Node.js
+# --- Node.js dependencies ---
 node_modules/
 
-# Build output
-mis-pwa/dist/
-server/dist/
+# --- Build output ---
+dist/
+build/
+.vite/
 
-# Logs
+# --- Logs ---
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# OS files
+# --- Environment variables ---
+.env
+.env.local
+.env.*.local
+
+# --- Editor/IDE settings ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- OS generated files ---
 .DS_Store
 Thumbs.db
 
-# IDE files
-.vscode/
-.idea/
-
-# Environment files
-.env
-.env.local
-.env.development
-.env.test
-.env.production
-
-# Misc
-mis-pwa/.next/
-mis-pwa/.cache/
-mis-pwa/.parcel-cache/
-mis-pwa/.eslintcache
-
-# Database
-*.sqlite
-*.db
-
-# Coverage
-coverage/
-
-# Git
-.git/
+# --- Optional: Dependency lock files ---
+# Uncomment below if you don't want to commit lock files
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
